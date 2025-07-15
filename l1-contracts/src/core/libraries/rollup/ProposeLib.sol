@@ -146,16 +146,19 @@ library ProposeLib {
     );
 
     rollupStore.tips = rollupStore.tips.updatePendingBlockNumber(blockNumber);
-    rollupStore.archives[blockNumber] = _args.archive;
-    STFLib.setTempBlockLog(
-      blockNumber,
-      TempBlockLog({
-        headerHash: v.headerHash,
-        blobCommitmentsHash: blobCommitmentsHash,
-        slotNumber: header.slotNumber,
-        feeHeader: feeHeader
-      })
-    );
+    {
+      bytes32 archive = _args.archive;
+      STFLib.setTempBlockLog(
+        blockNumber,
+        TempBlockLog({
+          archive: archive,
+          headerHash: v.headerHash,
+          blobCommitmentsHash: blobCommitmentsHash,
+          slotNumber: header.slotNumber,
+          feeHeader: feeHeader
+        })
+      );
+    }
 
     // @note  The block number here will always be >=1 as the genesis block is at 0
     v.inHash = rollupStore.config.inbox.consume(blockNumber);
@@ -179,7 +182,7 @@ library ProposeLib {
 
     uint256 pendingBlockNumber = STFLib.getEffectivePendingBlockNumber(currentTime);
 
-    bytes32 tipArchive = rollupStore.archives[pendingBlockNumber];
+    bytes32 tipArchive = STFLib.getArchive(pendingBlockNumber);
     require(
       tipArchive == _args.header.lastArchiveRoot,
       Errors.Rollup__InvalidArchive(tipArchive, _args.header.lastArchiveRoot)

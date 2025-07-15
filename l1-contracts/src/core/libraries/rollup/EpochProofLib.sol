@@ -104,7 +104,7 @@ library EpochProofLib {
     {
       // We do it this way to provide better error messages than passing along the storage values
       {
-        bytes32 expectedPreviousArchive = rollupStore.archives[_start - 1];
+        bytes32 expectedPreviousArchive = STFLib.getArchive(_start - 1);
         require(
           expectedPreviousArchive == _args.previousArchive,
           Errors.Rollup__InvalidPreviousArchive(expectedPreviousArchive, _args.previousArchive)
@@ -112,7 +112,7 @@ library EpochProofLib {
       }
 
       {
-        bytes32 expectedEndArchive = rollupStore.archives[_end];
+        bytes32 expectedEndArchive = STFLib.getArchive(_end);
         require(
           expectedEndArchive == _args.endArchive,
           Errors.Rollup__InvalidArchive(expectedEndArchive, _args.endArchive)

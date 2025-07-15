@@ -10,6 +10,7 @@ import {
 } from "@aztec/core/libraries/compressed-data/BlockLog.sol";
 import {
   CompressedFeeHeader,
+  FeeHeader,
   FeeHeaderLib
 } from "@aztec/core/libraries/compressed-data/fees/FeeStructs.sol";
 import {ChainTipsLib, CompressedChainTips} from "@aztec/core/libraries/compressed-data/Tips.sol";
@@ -38,7 +39,23 @@ library STFLib {
     rollupStore.config.vkTreeRoot = _genesisState.vkTreeRoot;
     rollupStore.config.protocolContractTreeRoot = _genesisState.protocolContractTreeRoot;
 
-    rollupStore.archives[0] = _genesisState.genesisArchiveRoot;
+    // Store genesis archive in tempBlockLog at index 0
+    setTempBlockLog(
+      0,
+      TempBlockLog({
+        archive: _genesisState.genesisArchiveRoot,
+        headerHash: bytes32(0),
+        blobCommitmentsHash: bytes32(0),
+        slotNumber: Slot.wrap(0),
+        feeHeader: FeeHeader({
+          excessMana: 0,
+          feeAssetPriceNumerator: 0,
+          manaUsed: 0,
+          congestionCost: 0,
+          proverCost: 0
+        })
+      })
+    );
   }
 
   function setTempBlockLog(uint256 _blockNumber, TempBlockLog memory _tempBlockLog) internal {
@@ -139,6 +156,11 @@ library STFLib {
   function getSlotNumber(uint256 _blockNumber) internal view returns (Slot) {
     (, uint256 size) = innerIsStale(_blockNumber, true);
     return getStorage().tempBlockLogs[_blockNumber % size].slotNumber.decompress();
+  }
+
+  function getArchive(uint256 _blockNumber) internal view returns (bytes32) {
+    (, uint256 size) = innerIsStale(_blockNumber, true);
+    return getStorage().tempBlockLogs[_blockNumber % size].archive;
   }
 
   function getEffectivePendingBlockNumber(Timestamp _timestamp) internal view returns (uint256) {

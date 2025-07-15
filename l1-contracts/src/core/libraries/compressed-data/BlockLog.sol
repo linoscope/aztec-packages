@@ -26,6 +26,7 @@ struct BlockLog {
 }
 
 struct TempBlockLog {
+  bytes32 archive;
   bytes32 headerHash;
   bytes32 blobCommitmentsHash;
   Slot slotNumber;
@@ -33,6 +34,7 @@ struct TempBlockLog {
 }
 
 struct CompressedTempBlockLog {
+  bytes32 archive;
   bytes32 headerHash;
   bytes32 blobCommitmentsHash;
   CompressedSlot slotNumber;
@@ -51,6 +53,7 @@ library CompressedTempBlockLogLib {
     returns (CompressedTempBlockLog memory)
   {
     return CompressedTempBlockLog({
+      archive: _blockLog.archive,
       headerHash: _blockLog.headerHash,
       blobCommitmentsHash: _blockLog.blobCommitmentsHash,
       slotNumber: _blockLog.slotNumber.compress(),
@@ -64,6 +67,7 @@ library CompressedTempBlockLogLib {
     returns (TempBlockLog memory)
   {
     return TempBlockLog({
+      archive: _compressedBlockLog.archive,
       headerHash: _compressedBlockLog.headerHash,
       blobCommitmentsHash: _compressedBlockLog.blobCommitmentsHash,
       slotNumber: _compressedBlockLog.slotNumber.decompress(),

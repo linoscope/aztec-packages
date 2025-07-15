@@ -200,7 +200,7 @@ contract Rollup is IStaking, IValidatorSelection, IRollup, RollupCore {
     require(slot > lastSlot, Errors.Rollup__SlotAlreadyInChain(lastSlot, slot));
 
     // Make sure that the proposer is up to date and on the right chain (ie no reorgs)
-    bytes32 tipArchive = rollupStore.archives[pendingBlockNumber];
+    bytes32 tipArchive = STFLib.getArchive(pendingBlockNumber);
     require(tipArchive == _archive, Errors.Rollup__InvalidArchive(tipArchive, _archive));
 
     address proposer = ExtRollupLib2.getProposerAt(slot);
@@ -285,9 +285,9 @@ contract Rollup is IStaking, IValidatorSelection, IRollup, RollupCore {
 
     return (
       tips.provenBlockNumber,
-      rollupStore.archives[tips.provenBlockNumber],
+      STFLib.getArchive(tips.provenBlockNumber),
       tips.pendingBlockNumber,
-      rollupStore.archives[tips.pendingBlockNumber],
+      STFLib.getArchive(tips.pendingBlockNumber),
       archiveAt(_myHeaderBlockNumber),
       getEpochForBlock(tips.provenBlockNumber)
     );
@@ -335,7 +335,7 @@ contract Rollup is IStaking, IValidatorSelection, IRollup, RollupCore {
    */
   function archive() external view override(IRollup) returns (bytes32) {
     RollupStore storage rollupStore = STFLib.getStorage();
-    return rollupStore.archives[rollupStore.tips.getPendingBlockNumber()];
+    return STFLib.getArchive(rollupStore.tips.getPendingBlockNumber());
   }
 
   function getProvenBlockNumber() external view override(IRollup) returns (uint256) {
@@ -362,7 +362,7 @@ contract Rollup is IStaking, IValidatorSelection, IRollup, RollupCore {
     }
 
     return BlockLog({
-      archive: rollupStore.archives[_blockNumber],
+      archive: STFLib.getArchive(_blockNumber),
       headerHash: tempBlockLog.headerHash,
       blobCommitmentsHash: tempBlockLog.blobCommitmentsHash,
       slotNumber: tempBlockLog.slotNumber,
@@ -725,7 +725,7 @@ contract Rollup is IStaking, IValidatorSelection, IRollup, RollupCore {
   function archiveAt(uint256 _blockNumber) public view override(IRollup) returns (bytes32) {
     RollupStore storage rollupStore = STFLib.getStorage();
     return _blockNumber <= rollupStore.tips.getPendingBlockNumber()
-      ? rollupStore.archives[_blockNumber]
+      ? STFLib.getArchive(_blockNumber)
       : bytes32(0);
   }
 
